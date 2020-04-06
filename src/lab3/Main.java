@@ -1,5 +1,6 @@
 package lab3;
 
+import java.lang.ref.Reference;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
@@ -12,6 +13,7 @@ public class Main {
 	static private final int SEED_MAX = 50000;
 	static private final int LIST_SIZE = 600;
 	static private final int NUMBER_OF_THREAD = 4;
+	static private final int TIME_BETWEEN_SHOW_STATS = 2000;
 
 
 	static private Boolean endProgram = true;
@@ -19,11 +21,13 @@ public class Main {
 	public static void main(String[] args)
 	{
 
-		Map<Integer , int[]> map = new HashMap<Integer, int[]>();
+		Map<Integer , Reference<int[]>> map = new HashMap<Integer,  Reference<int[]>>();
 
 		Thread sortThreadTab[] = new Thread[NUMBER_OF_THREAD];
 
 		Semaphore mutex = new Semaphore(1);
+
+		ReferenceCounter referenceCounter = new ReferenceCounter();
 
 		//
 		// Create and run threads.
@@ -33,13 +37,15 @@ public class Main {
 
 
 		//for(Thread thread : sortThreadTab)
-		for(int i = 0; i <= NUMBER_OF_THREAD; i++)
+		for(int i = 0; i < NUMBER_OF_THREAD; i++)
 		{
-			sortThreadTab[i] = new Thread(new SortThread(rand.nextInt(), map, mutex, SEED_MIN, SEED_MAX, LIST_SIZE));
+			sortThreadTab[i] = new Thread(new SortThread(rand.nextInt(), map, mutex, SEED_MIN, SEED_MAX, LIST_SIZE, referenceCounter));
 			sortThreadTab[i].start();
 		}
 
 		while(true){
+			referenceCounter.PrintStat();
+			referenceCounter.cleanSecondsCountern();
 			endProgram = true;
 			for(Thread thread : sortThreadTab)
 			{
@@ -57,14 +63,13 @@ public class Main {
 			else
 			{
 				try{
-				 Thread.sleep(1000);
+				 Thread.sleep(TIME_BETWEEN_SHOW_STATS);
 				}
 				catch(Exception e){
 					System.out.println("----------------------------------------------------------");
 					System.out.println("Exception Sleep> " + e.getMessage());
 					e.printStackTrace();
 				}
-				continue;
 			}
 		}
 
@@ -73,125 +78,4 @@ public class Main {
 		System.exit(0);
 	}
 
-		// --------------------------------------------------------------------------
-//		System.out.println("Started program");
-//
-//
-//		try{
-//			Random rand = new Random();
-//			int size = 10;
-//			int array[] = new int[size];
-//
-//			//
-//			// create array
-//			//
-//			for (int i = 0; i< size; i++)
-//			{
-//				array[i] = rand.nextInt(10000);
-//			}
-//
-//			//
-//			// print array
-//			//
-//			{
-//				final int linesize = 15;
-//				int currentPossitionInLine = 0;
-//
-//				for (int i = 0; i< size; i++)
-//				{
-//
-//				    System.out.print(array[i] + "  ");
-//				    currentPossitionInLine++;
-//				    if(currentPossitionInLine >= linesize)
-//				    {
-//				    	System.out.println("");
-//				    	currentPossitionInLine = 0;
-//				    }
-//				}
-//				if(currentPossitionInLine != linesize)
-//					System.out.println("");
-//			}
-//
-//			//
-//			// Get method
-//			//
-//			Class<?> reflectIntSorter = Class.forName("package1.IntSorter");
-//
-//			System.out.println("Main> Found IntSorter");
-//
-//			java.lang.reflect.Method methodSolve = reflectIntSorter.getMethod("solve", int[].class);
-//
-//			System.out.println("Main> Found method package1.IntSorter.solve");
-//
-//			if(methodSolve == null)
-//			{
-//				System.out.println("Main> ERROR: Cannot find solve");
-//				return;
-//			}
-//
-//			Object obj = methodSolve.invoke(reflectIntSorter.newInstance(),array);
-//			 array = (int[])obj;
-//
-//			//
-//			// print array
-//			//
-//			{
-//				final int linesize = 15;
-//				int currentPossitionInLine = 0;
-//
-//				System.out.println("\n\n");
-//				for (int i = 0; i< size; i++)
-//				{
-//
-//				    System.out.print(array[i] + "  ");
-//				    currentPossitionInLine++;
-//				    if(currentPossitionInLine >= linesize)
-//				    {
-//				    	System.out.println("");
-//				    	currentPossitionInLine = 0;
-//				    }
-//				}
-//			}
-
-//			//getDeclaredMethod("solve", int[].class);
-//
-//			// solve(List<IntElement> list)
-//			// reflectClass.getDeclaredMethod(name, parameterTypes)
-//
-//			//
-//			// get IntElement
-//			//
-//			Class<?> reflectIntElement = Class.forName("IntElement");
-//			Type typeIntElement = reflectIntElement.getT
-//
-//			//
-//			//create IntElement list
-//			//
-//
-//			//List<?> list = new ArrayList<>();
-//			List list = Array.newInstance(reflectIntElement.class, LIST_SIZE);
-//
-//
-//			//
-//			// Fill list
-//			//
-//
-//			Random rand = new Random();
-//
-//			for (int i = 0; i< LIST_SIZE; i++)
-//			{
-//				Object intElement = reflectIntElement.getConstructor(
-//						   int.class).newInstance(rand.nextInt(10000));
-//				//IntElement intElement = new IntElement(dtemp--);
-//				//IElement intElement = new FloatElement((float)rand.nextInt(10000)/10, "str");
-//				list.add(intElement);
-//			}
-//
-//		}
-//		catch(Exception e){
-//			System.out.println("----------------------------------------------------------");
-//			System.out.println("Exception> " + e.getMessage());
-//			e.printStackTrace();
-//		}
-//	}
 }
